@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>Formulario de Validación</title>
+    <link rel="stylesheet" href="examen-CSS.css">
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <form id="miFormulario">
+        <label for="nombre">Nombre: <input type="text" id="nombre" name="nombre"></label>
+        <span id="errorNombre" class="error"></span><br>
+
+        <label for="edad">Edad: <input type="text" id="edad" name="edad"></label>
+        <span id="errorEdad" class="error"></span><br>
+
+        <label for="telefono">Teléfono: <input type="text" id="telefono" name="telefono"></label>
+        <span id="errorTelefono" class="error"></span><br>
+
+        <label for="genero">Género: 
+            <select id="genero" name="genero">
+                <option value="">Seleccione...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="otro">Otro</option>
+            </select>
+        </label>
+        <span id="errorGenero" class="error"></span><br>
+
+        <label for="poblacion">Población: 
+            <select id="poblacion" name="poblacion">
+                <option value="">Seleccione...</option>
+                <option value="urbana">Urbana</option>
+                <option value="rural">Rural</option>
+            </select>
+        </label>
+        <span id="errorPoblacion" class="error"></span><br>
+
+        <label><input type="checkbox" id="condiciones" name="condiciones"> Declaro haber leído y aceptar las condiciones...</label>
+        <span id="errorCondiciones" class="error"></span><br>
+
+        <input type="submit" value="Enviar">
+    </form>
+</body>
+</html>
+<script>
+//de otra forma,..seria lo mismo que validar formulario
+document.getElementById('miFormulario').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Función para mostrar errores
+    const mostrarError = (id, mensaje) => {
+        document.getElementById(id).textContent = mensaje;
+    };
+
+    // Limpiar errores previos
+    document.querySelectorAll('.error').forEach(error => error.textContent = '');
+
+    // Obtener valores de los campos del formulario
+    const campos = {
+        nombre: document.getElementById('nombre').value.trim(),
+        edad: document.getElementById('edad').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        genero: document.getElementById('genero').value,
+        poblacion: document.getElementById('poblacion').value,
+        condiciones: document.getElementById('condiciones').checked
+    };
+
+    let isValid = true;
+
+    // Validaciones
+    if (!campos.nombre) {
+        mostrarError('errorNombre', 'El nombre es obligatorio.');
+        isValid = false;
+    }
+
+    const edadNumero = parseInt(campos.edad, 10);
+    if (!campos.edad || isNaN(edadNumero) || edadNumero < 18 || edadNumero > 65) {
+        mostrarError('errorEdad', 'La edad debe ser un número entre 18 y 65.');
+        isValid = false;
+    }
+
+    const telefonoRegex = /^\d{3}-\d{3}-\d{3}$/;telefonoRegex
+    if (!campos.telefono || !telefonoRegex.test(campos.telefono)) {
+        mostrarError('errorTelefono', 'El teléfono debe tener el formato 999-999-999.');
+        isValid = false;
+    }
+
+    if (!campos.genero) {
+        mostrarError('errorGenero', 'Debe seleccionar un género.');
+        isValid = false;
+    }
+
+    if (!campos.poblacion) {
+        mostrarError('errorPoblacion', 'Debe seleccionar una población.');
+        isValid = false;
+    }
+
+    if (!campos.condiciones) {
+        mostrarError('errorCondiciones', 'Debe aceptar las condiciones.');
+        isValid = false;
+    }
+
+    // Enviar el formulario si todas las validaciones son correctas
+    if (isValid) {
+        alert('Formulario enviado correctamente.');
+        document.getElementById('miFormulario').submit();
+    }
+});
+</script>   

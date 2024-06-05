@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuesta de Los Simpson</title>
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .char-count {
+        margin-left: 10px;
+    }
+
+    .bar-container {
+        margin-bottom: 10px;
+    }
+
+    .bar {
+        height: 20px;
+        background-color: blue;
+    }
+
+    .bar-label {
+        display: inline-block;
+        margin-right: 10px;
+    }
+</style>
+</head>
+<body>
+    <div class="form-container">
+        <h2> ¿Cuál es tu personaje preferido de Los Simpson?</h2>
+        <form id="surveyForm">
+            <div class="form-group characters">
+                <label for="option1">Opción 1:</label>
+                <input type="text" id="option1" name="Homer" placeholder="Homer" maxlength="25">
+                <span class="char-count" id="option1Count">0/25</span>
+            </div>
+
+            <div class="form-group characters">
+                <label for="option2">Opción 2:</label>
+                <input type="text" id="option2" name="Lisa" placeholder="Lisa" maxlength="25">
+                <span class="char-count" id="option2Count">0/25</span>
+            </div>
+
+            <div id="additionalCharacters"></div>
+
+            <button type="button" class="add-btn" id="addButton">+</button><br><br>
+
+            <button type="submit" class="submit-btn">Post</button>
+        </form>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+        <h2>Elige tu personaje preferido</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="result-container" id="resultBarsContainer">
+        <h2>Resultados de la Encuesta</h2>
+        <div id="resultBars"></div>
+    </div>
+
+    <script>
+        const maxCharacters = 4;
+        let characterCount = 2;
+        const results = {};
+
+        function addCharacterField() {
+            if (characterCount < maxCharacters) {
+                const container = document.getElementById('additionalCharacters');
+                const optionNumber = characterCount + 1;
+                const div = document.createElement('div');
+                div.className = 'form-group characters';
+                div.innerHTML = `
+                    <label for="option${optionNumber}">Opción ${optionNumber}:</label>
+                    <input type="text" id="option${optionNumber}" name="option${optionNumber}" placeholder="Opción ${optionNumber}" maxlength="25">
+                    <span class="char-count" id="option${optionNumber}Count">0/25</span>
+                `;
+                container.appendChild(div);
+
+                document.getElementById(`option${optionNumber}`).addEventListener('input', function() {
+                    document.getElementById(`option${optionNumber}Count`).textContent = `${this.value.length}/25`;
+                });
+
+                characterCount++;
+                if (characterCount === maxCharacters) {
+                    document.getElementById('addButton').disabled = true;
+                }
+            }
+        }
+
+        document.getElementById('addButton').addEventListener('click', addCharacterField);
+
+        document.getElementById('surveyForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let options = [];
+            for (let i = 1; i <= characterCount; i++) {
+                const option = document.getElementById(`option${i}`).value.trim();
+                if (option) options.push(option);
+            }
+
+            results.options = options;
+            results.votes = Array(options.length).fill(0);
+
+            displayResults();
+        });
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            results.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <label>
+                        <input type="radio" name="vote" value="${index}">
+                        ${option}
+                    </label>
+                `;
+                resultsDiv.appendChild(div);
+            });
+
+            const voteButton = document.createElement('button');
+            voteButton.textContent = 'Votar';
+            voteButton.className = 'submit-btn';
+            voteButton.addEventListener('click', submitVote);
+            resultsDiv.appendChild(voteButton);
+        }
+
+        function submitVote() {
+            const selectedOption = document.querySelector('input[name="vote"]:checked');
+            if (!selectedOption) {
+                alert('Por favor, seleccione una opción para votar.');
+                return;
+            }
+
+            const selectedIndex = parseInt(selectedOption.value);
+            results.votes[selectedIndex]++;
+
+            displayFinalResults();
+        }
+
+        function displayFinalResults() {
+            const resultBarsDiv = document.getElementById('resultBars');
+            resultBarsDiv.innerHTML = '';
+
+            let totalVotes = results.votes.reduce((acc, cur) => acc + cur, 0);
+
+            results.options.forEach((option, index) => {
+                const percentage = ((results.votes[index] / totalVotes) * 100).toFixed(2);
+
+                const barContainer = document.createElement('div');
+                barContainer.className = 'bar-container';
+
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.width = `${percentage}%`;
+
+                const barLabel = document.createElement('span');
+                barLabel.className = 'bar-label';
+                barLabel.textContent = `${option}: ${percentage}%`;
+
+                barContainer.appendChild(barLabel);
+                barContainer.appendChild(bar);
+
+                resultBarsDiv.appendChild(barContainer);
+            });
+
+            const voteOptions = document.querySelectorAll('input[name="vote"]');
+            voteOptions.forEach(option => option.disabled = true);
+
+            document.querySelector('.submit-btn').disabled = true;
+        }
+    </script>
+</body>
+</html>
